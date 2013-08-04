@@ -10,6 +10,7 @@
 #import "APIClient.h"
 #import "SVPullToRefresh.h"
 #import "AFHTTPRequestOperation.h"
+#import "UIImageView+AFNetworking.h"
 
 @interface LodgesViewController ()
 - (void)loadNextEntries;
@@ -96,6 +97,21 @@
     // Configure the cell...
     cell.textLabel.text = [lodge objectForKey:@"name"];
     cell.detailTextLabel.text = [lodge objectForKey:@"description"];
+    
+    id imageUrl = lodge[@"image"];
+    if (imageUrl != [NSNull null]) {
+        NSLog(@"add image for %@", lodge[@"name"]);
+        __weak UITableViewCell* weakCell = cell;
+        [cell.imageView setImageWithURLRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:imageUrl]] placeholderImage:nil success:^(NSURLRequest *request, NSHTTPURLResponse *response, UIImage *image) {
+            weakCell.imageView.image = image;
+            [weakCell setNeedsLayout];
+        } failure:^(NSURLRequest *request, NSHTTPURLResponse *response, NSError *error) {
+            NSLog(@"error: %@", error);
+        }];
+    } else {
+        [cell.imageView setImage:nil];
+    }
+
     
     return cell;
 }
