@@ -8,9 +8,11 @@
 
 #import "LodgesViewController.h"
 #import "APIClient.h"
+#import "SVPullToRefresh.h"
+#import "AFHTTPRequestOperation.h"
 
 @interface LodgesViewController ()
-
+- (void)loadNextEntries;
 @end
 
 @implementation LodgesViewController
@@ -33,19 +35,31 @@
  
     // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
     // self.navigationItem.rightBarButtonItem = self.editButtonItem;
-    
+    __weak id weakSelf = self;
+    [self.tableView addInfiniteScrollingWithActionHandler:^{
+        [weakSelf loadNextEntries];
+    }];
     [self fetchLodges];
 }
+
+
 
 - (void)fetchLodges
 {
     APIClient* apiClient = [APIClient sharedInstance];
-    [apiClient getPath:@"lodges" parameters:nil success:^(AFHTTPRequestOperation *operation, id JSON) {
-        NSLog(@"responseObject: %@", JSON);
+    [apiClient fetchLodges:^(id JSON) {
         self.lodges = [JSON objectForKey:@"lodges"];
         [self.tableView reloadData];
-    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-        NSLog(@"error: %@", error);
+    }];
+}
+
+- (void)loadNextEntries
+{
+    APIClient* apiClient = [APIClient sharedInstance];
+    [apiClient fetchNextLodges:^(id JSON) {
+        self.lodges = [self.lodges arrayByAddingObjectsFromArray:[JSON objectForKey:@"lodges"]];
+        [self.tableView reloadData];
+        [self.tableView.infiniteScrollingView stopAnimating];
     }];
 }
 

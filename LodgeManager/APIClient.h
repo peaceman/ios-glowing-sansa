@@ -12,4 +12,6 @@
 
 @interface APIClient : AFHTTPClient
 + (id)sharedInstance;
+- (void)fetchLodges:(void (^)(id))successBlock;
+- (void)fetchNextLodges:(void (^)(id))successBlock;
 @end
