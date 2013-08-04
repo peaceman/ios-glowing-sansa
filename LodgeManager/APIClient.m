@@ -7,9 +7,11 @@
 //
 
 #import "APIClient.h"
+#import "AFJSONRequestOperation.h"
 
 @implementation APIClient
-+ (id)sharedInstance {
++ (id)sharedInstance
+{
     static APIClient* sharedInstance;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
@@ -18,5 +20,18 @@
     });
     
     return sharedInstance;
+}
+
+- (id)initWithBaseURL:(NSURL *)url
+{
+    self = [super initWithBaseURL:url];
+    if (!self) {
+        return nil;
+    }
+    
+    [self registerHTTPOperationClass:[AFJSONRequestOperation class]];
+    [self setDefaultHeader:@"Accept" value:@"application/json"];
+    
+    return self;
 }
 @end

@@ -40,8 +40,10 @@
 - (void)fetchLodges
 {
     APIClient* apiClient = [APIClient sharedInstance];
-    [apiClient getPath:@"lodges" parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
-        NSLog(@"responseObject: %@", responseObject);
+    [apiClient getPath:@"lodges" parameters:nil success:^(AFHTTPRequestOperation *operation, id JSON) {
+        NSLog(@"responseObject: %@", JSON);
+        self.lodges = [JSON objectForKey:@"lodges"];
+        [self.tableView reloadData];
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
         NSLog(@"error: %@", error);
     }];
@@ -64,9 +66,11 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-#warning Incomplete method implementation.
-    // Return the number of rows in the section.
-    return 5;
+    if (self.lodges && self.lodges.count) {
+        return self.lodges.count;
+    } else {
+        return 0;
+    }
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -74,9 +78,10 @@
     static NSString *CellIdentifier = @"LodgeCell";
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier forIndexPath:indexPath];
     
+    NSDictionary* lodge = [self.lodges objectAtIndex:indexPath.row];
     // Configure the cell...
-    cell.textLabel.text = @"test";
-    cell.detailTextLabel.text = @"detail test";
+    cell.textLabel.text = [lodge objectForKey:@"name"];
+    cell.detailTextLabel.text = [lodge objectForKey:@"description"];
     
     return cell;
 }
